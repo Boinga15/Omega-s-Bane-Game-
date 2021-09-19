@@ -1409,6 +1409,7 @@ void Combat() {
 		system("cls");
 		if (!enemy1.isActive && !enemy2.isActive && !enemy3.isActive) {
 			cout << "You won!" << endl;
+			chanceOfAttack = 5;
 			player.stamina = player.maxStamina;
 			if (player.selectedClass == 3) {
 				player.health += ceil(player.maxHealth * 0.2);
@@ -1541,9 +1542,11 @@ void Combat() {
 		cout << "5: " << player.actions[4] << "." << endl;
 		if (player.potions.size() != 0) {
 			cout << "6: Use a potion." << endl;
-			cout << "7: End turn." << endl;
+			cout << "7: Flee." << endl;
+			cout << "8: End turn." << endl;
 		} else {
-			cout << "6: End turn." << endl;
+			cout << "6: Flee." << endl;
+			cout << "7: End turn" << endl;
 		}
 		int op = getInput();
 
@@ -1567,11 +1570,36 @@ void Combat() {
 		case 6:
 			if (player.potions.size() != 0) {
 				usePotion();
-			} else {
-				playerTurnDone = true;
+			} else { // Fleeing from battles.
+				cout << "You attempt to flee from the battle." << endl;
+				if (rand() % 100 < player.speed) {
+					cout << "You successfully ran from the battle!" << endl;
+					BattleOver = true;
+				} else {
+					cout << "You failed to flee from the battle!" << endl;
+					playerTurnDone = true;
+					system("pause");
+				}
 			}
 			break;
 		case 7:
+			if (player.potions.size() != 0) {
+				cout << "You attempt to flee from the battle." << endl;
+				if (rand() % 100 < player.speed) {
+					cout << "You successfully ran from the battle!" << endl;
+					BattleOver = true;
+				}
+				else {
+					cout << "You failed to flee from the battle!" << endl;
+					playerTurnDone = true;
+					system("pause");
+				}
+			}
+			else {
+				playerTurnDone = true;
+			}
+			break;
+		case 8:
 			if (player.potions.size() != 0) {
 				playerTurnDone = true;
 			} else {
@@ -1763,7 +1791,15 @@ void GetNewAttack(string attackName) {
 void explore() {
 	cout << "You explore the place." << endl;
 	roomsExplored += 1;
-	if (checkForShop()) {
+	if (checkForBoss()) {
+		if (currentFloor == 6) {
+			cout << "You discover Omega's location. You mark its location on your map." << endl;
+		}
+		else {
+			cout << "You discover the way down, but know it's guarded by a powerful force. You mark its location on your map." << endl;
+		}
+		hasFoundBoss = true;
+	} else if (checkForShop()) {
 		if (currentFloor == 6) {
 			cout << "You found a shop in the void! You mark its location on your map." << endl;
 		}
@@ -1777,13 +1813,6 @@ void explore() {
 	} else if (checkForElite()) {
 		cout << "You discover a lair that belongs to a powreful beast. You mark its location on your map." << endl;
 		eliteStatus = 1;
-	} else if (checkForBoss()) {
-		if (currentFloor == 6) {
-			cout << "You discover Omega's location. You mark its location on your map." << endl;
-		} else {
-			cout << "You discover the way down, but know it's guarded by a powerful force. You mark its location on your map." << endl;
-		}
-		hasFoundBoss = true;
 	} else {
 		int randomExploration = 1 + rand() % 100;
 		if (randomExploration < 40) {
@@ -2461,7 +2490,7 @@ void hub() {
 			cout << "5: Fight the elite." << endl;
 		}
 		if (hasFoundBoss) {
-			if (currentFloor == 6) {
+			if (currentFloor != 6) {
 				cout << "6: Fight the guardian." << endl;
 			}
 			else {
